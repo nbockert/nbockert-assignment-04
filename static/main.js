@@ -33,54 +33,56 @@ function displayResults(data) {
 }
 
 function displayChart(data) {
-    // let chart = document.getElementById("similarity-chart");
-    let docDiv = document.createElement('div');
-    docDiv.style.display = 'none';
-    // ctx = chart.getContext("2d");
-    document.body.append(docDiv)
-    // chart.appendChild(docDiv);
-    var plotdata = [
-        {
-          x: data.indices,
-          y: data.similarities,
-          type: 'bar'
-        }
-      ];
-      Plotly.newPlot(docDiv, plotdata).then(() => {
-        // Get the SVG element from the temporary div
-        const svgElement = docDiv.getElementsByTagName('svg')[0];
-        
-        // Serialize the SVG to a string
-        const svgData = new XMLSerializer().serializeToString(svgElement);
-
-        // Create a Blob from the SVG string
-        const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
-        const url = URL.createObjectURL(svgBlob);
-
-        // Create an Image object and set its source to the Blob URL
-        const img = new Image();
-        img.onload = function() {
-            // Get the canvas context
-            const canvas = document.getElementById('similarity-chart');
-            const ctx = canvas.getContext('2d');
-
-            // Clear the canvas before drawing
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Draw the image on the canvas
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height); // Adjust dimensions as needed
-
-            // Clean up the Blob URL and remove the temporary div
-            URL.revokeObjectURL(url);
-            document.body.removeChild(docDiv); // Remove the temporary div from the DOM
-        };
-        img.src = url; // Start loading the image from the Blob URL
-    });
-    
-    // Input: data (object) - contains the following keys:
+        // Input: data (object) - contains the following keys:
     //        - documents (list) - list of documents
     //        - indices (list) - list of indices   
     //        - similarities (list) - list of similarities
     // TODO: Implement function to display chart here
     //       There is a canvas element in the HTML file with the id 'similarity-chart'
+    
+    let graphDiv = document.getElementById('graph');
+    let docDiv = document.createElement('div');
+    // graphDiv.innerHTML = `<strong id="graph_title">Cosine Similarity of the Top 5 Most Relevant Documents</strong>`;
+    
+    let formattedIndices = data.indices.map(index => `doc ${index}`);
+    var plotdata = [
+        {
+          x: formattedIndices,
+          y: data.similarities,
+          type: 'bar',
+          marker: {
+            color: 'rgb(8, 68, 94)',  // Custom color with transparency
+            line: {
+                color: 'rgb(8, 108, 150)',  // Outline color
+                width: 1.5  // Outline width
+            }
+        }
+
+        }
+      ];
+      var layout = {
+        title:{
+            text: 'Cosine Similarity of the Top 5 Most Relevant Documents',
+            font: {
+                family: "Arial Black, sans-serif",
+                size: 20,
+                color: '#08445e',
+            },
+            x: 0.5,  // Align the title to the center
+            xanchor: 'center'  // Ensures it is truly centered
+        },
+        paper_bgcolor: 'rgb(244, 244, 249)',  // Background color for the entire graph
+        plot_bgcolor: 'rgb(244, 244, 249)',  
+        xaxis: {
+            title: 'Document', // Label for the x-axis
+        },
+        yaxis: {
+            title: 'Cosign Similarity', // Label for the y-axis
+            range: [0, 1.0] // Set y-axis range from 0 to max similarity
+        }
+    };
+      Plotly.newPlot(docDiv, plotdata,layout);
+      graphDiv.appendChild(docDiv);
+    
+
 }
